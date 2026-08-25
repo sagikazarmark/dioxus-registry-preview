@@ -15,7 +15,7 @@ Add the facade to the Preview-only part of a Registry:
 
 ```toml
 [dependencies]
-dioxus-registry-preview = "0.3.0"
+dioxus-registry-preview = "0.1.0"
 
 dioxus = { version = "0.7.0", default-features = false, features = ["launch", "lib", "web"] }
 ```
