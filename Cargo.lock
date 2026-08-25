@@ -846,7 +846,7 @@ dependencies = [
 
 [[package]]
 name = "dioxus-registry-preview"
-version = "0.3.0"
+version = "0.1.0"
 dependencies = [
  "dioxus",
  "dioxus-registry-preview-core",
@@ -857,7 +857,7 @@ dependencies = [
 
 [[package]]
 name = "dioxus-registry-preview-core"
-version = "0.3.0"
+version = "0.1.0"
 dependencies = [
  "proc-macro2",
  "pulldown-cmark",
@@ -869,7 +869,7 @@ dependencies = [
 
 [[package]]
 name = "dioxus-registry-preview-macros"
-version = "0.3.0"
+version = "0.1.0"
 dependencies = [
  "dioxus-registry-preview-core",
  "proc-macro-crate",

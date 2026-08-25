@@ -23,9 +23,9 @@ default = []
 web = ["dep:web-sys", "dioxus/launch", "dioxus/web"]
 
 [dependencies]
-fixture-docs = { package = "dioxus-registry-preview", path = "../../crates/dioxus-registry-preview", version = "0.3.0" }
+fixture-docs = { package = "dioxus-registry-preview", path = "../../crates/dioxus-registry-preview", version = "0.1.0" }
 
-dioxus = { version = "0.7.0", default-features = false, features = ["lib"] }
+dioxus = { version = "0.7.10", default-features = false, features = ["lib"] }
 web-sys = { version = "0.3.77", features = ["Location", "Window"], optional = true }
 
 [lints]
