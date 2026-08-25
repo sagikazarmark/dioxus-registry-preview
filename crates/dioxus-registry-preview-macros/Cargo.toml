@@ -13,7 +13,7 @@ categories.workspace = true
 proc-macro = true
 
 [dependencies]
-dioxus-registry-preview-core.workspace = true
+dioxus-registry-preview-core = { workspace = true }
 
 proc-macro-crate = "3.0.0"
 proc-macro2 = "1.0.101"
