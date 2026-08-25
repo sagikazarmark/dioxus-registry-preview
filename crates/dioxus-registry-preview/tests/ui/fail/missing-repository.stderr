@@ -1,0 +1,13 @@
+error: RDOC037: no Registry repository is configured; set package.repository in Cargo.toml or add repository to component_pages!
+  --> tests/ui/fail/missing-repository.rs:12:1
+   |
+12 | / dioxus_registry_preview::component_pages! {
+13 | |     manifest: "../pass/catalog/registry.json",
+14 | |     group: Group {
+15 | |         "shared" => Group::Fixtures,
+...  |
+23 | |     },
+24 | | }
+   | |_^
+   |
+   = note: this error originates in the macro `dioxus_registry_preview::component_pages` (in Nightly builds, run with -Z macro-backtrace for more info)

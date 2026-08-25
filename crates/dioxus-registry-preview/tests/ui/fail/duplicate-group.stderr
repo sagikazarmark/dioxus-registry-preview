@@ -1,0 +1,5 @@
+error: RDOC019: duplicate group ID
+ --> tests/ui/fail/duplicate-group.rs:9:9
+  |
+9 |         "fixtures" => Group::Fixtures,
+  |         ^^^^^^^^^^

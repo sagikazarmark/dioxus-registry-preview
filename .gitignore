@@ -1,0 +1,22 @@
+# Devenv
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
+
+# Rust
+target/
+
+# Node
+node_modules/
+
+# Playwright's output. The screenshot baselines are committed; everything a run
+# writes about them is not.
+tests/browser/test-results/
+tests/browser/playwright-report/
+/test-results/

@@ -1,0 +1,24 @@
+[package]
+name = "dioxus-registry-preview-macros"
+version.workspace = true
+description = "Implementation macros re-exported by dioxus-registry-preview"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+dioxus-registry-preview-core.workspace = true
+
+proc-macro-crate = "3.0.0"
+proc-macro2 = "1.0.101"
+quote = "1.0.36"
+syn = "2.0.98"
+
+[lints]
+workspace = true

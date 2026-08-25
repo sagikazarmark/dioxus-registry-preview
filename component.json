@@ -1,0 +1,9 @@
+{
+  "name": "docs-registry-fixture",
+  "description": "External-consumer fixture for the documentation macros.",
+  "members": [
+    "fixtures/registry/components/default_page",
+    "fixtures/registry/components/custom_page",
+    "fixtures/registry/components/nested_layout"
+  ]
+}

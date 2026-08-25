@@ -1,0 +1,23 @@
+[package]
+name = "dioxus-registry-preview"
+version.workspace = true
+description = "Toolkit for building Dioxus component Registry Preview applications"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+dioxus-registry-preview-core.workspace = true
+dioxus-registry-preview-macros.workspace = true
+
+dioxus = { version = "0.7.0", default-features = false, features = ["lib", "router"] }
+
+[dev-dependencies]
+dioxus-ssr = "0.7.0"
+trybuild = "1.0.86"
+
+[lints]
+workspace = true

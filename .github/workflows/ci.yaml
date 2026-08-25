@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  DIOXUS_CLI_VERSION: 0.7.10
+
+jobs:
+  rust:
+    name: Rust and packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@63fed3e2fecf6f7b51dc6f043341b79ef82a9ae7 # v2.9.2
+
+      - name: Check formatting
+        run: cargo fmt --all --check
+
+      - name: Lint
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+      - name: Check workspace
+        run: cargo check --workspace --all-targets --locked
+
+      - name: Test workspace
+        run: cargo test --workspace --all-targets --locked
+
+      - name: Test documentation
+        run: cargo test --workspace --doc --locked
+
+      - name: Build documentation
+        run: cargo doc --workspace --no-deps --locked
+
+  msrv:
+    name: Rust 1.88
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Install MSRV
+        run: rustup toolchain install 1.88.0 --profile minimal
+
+      - name: Test on MSRV
+        run: cargo +1.88.0 test --workspace --all-targets --locked
+
+  current-dependencies:
+    name: Current compatible dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@63fed3e2fecf6f7b51dc6f043341b79ef82a9ae7 # v2.9.2
+
+      - name: Update compatible dependencies
+        run: cargo update
+
+      - name: Test workspace
+        run: cargo test --workspace --all-targets
+
+  browser:
+    name: External-consumer fixture
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Cache Rust artifacts
+        uses: Swatinem/rust-cache@63fed3e2fecf6f7b51dc6f043341b79ef82a9ae7 # v2.9.2
+
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@e00d2c94cc0067b77737821097a62d91c0301baa # v1.21.1
+
+      - name: Install the Dioxus CLI
+        run: cargo binstall --no-confirm --locked dioxus-cli@${{ env.DIOXUS_CLI_VERSION }}
+
+      - name: Add the wasm target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Install npm dependencies
+        run: |
+          npm ci
+          npm ci --prefix tests/browser
+
+      - name: Install Chromium
+        run: npm --prefix tests/browser exec playwright install -- --with-deps chromium
+
+      - name: Build the fixture Registries
+        run: |
+          dx build --package docs-registry-fixture --bin fixture-preview --features web --platform web --release
+          dx build --package docs-registry-fixture --bin custom-home-preview --features web --platform web --release
+
+      - name: Test the DOM protocol, helpers, and default chrome
+        run: npm test --prefix tests/browser
+
+      - name: Upload failures
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-failures
+          path: tests/browser/test-results
+          retention-days: 7

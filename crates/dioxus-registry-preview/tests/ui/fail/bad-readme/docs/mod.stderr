@@ -1,0 +1,12 @@
+error: RDOC016: $DIR/tests/ui/fail/bad-readme/docs/../README.md must start with an H1 and an introductory paragraph
+ --> tests/ui/fail/bad-readme/docs/mod.rs:1:1
+  |
+1 | / dioxus_registry_preview::component! {
+2 | |     group: "fixtures",
+3 | |     examples: {
+4 | |         overview { description: "This README is malformed." },
+5 | |     },
+6 | | }
+  | |_^
+  |
+  = note: this error originates in the macro `dioxus_registry_preview::component` (in Nightly builds, run with -Z macro-backtrace for more info)

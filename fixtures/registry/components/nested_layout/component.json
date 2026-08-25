@@ -1,0 +1,5 @@
+{
+  "name": "nested_layout",
+  "description": "A fixture with nested Example imports.",
+  "exclude": ["component.json", "README.md", "docs"]
+}

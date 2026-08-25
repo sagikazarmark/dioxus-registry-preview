@@ -1,0 +1,3 @@
+component_pages! {
+    manifest:
+}

@@ -1,0 +1,5 @@
+{
+  "name": "widget",
+  "description": "A fixture widget.",
+  "exclude": ["component.json", "README.md", "docs"]
+}

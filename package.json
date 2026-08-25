@@ -1,0 +1,26 @@
+{
+  "name": "@sagikazarmark/dioxus-registry-preview-playwright",
+  "version": "0.3.0",
+  "description": "Generic Playwright helpers for Dioxus component Registry Previews.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./browser/index.d.ts",
+      "default": "./browser/index.js"
+    }
+  },
+  "files": [
+    "browser"
+  ],
+  "peerDependencies": {
+    "@playwright/test": ">=1.50.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1"
+  },
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sagikazarmark/dioxus-registry-docs.git"
+  }
+}

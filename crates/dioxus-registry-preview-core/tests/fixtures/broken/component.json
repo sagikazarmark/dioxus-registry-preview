@@ -1,0 +1,8 @@
+{
+  "name": "broken-registry",
+  "description": "A deliberately invalid documentation Registry.",
+  "members": [
+    "components/broken",
+    "components/also/broken"
+  ]
+}

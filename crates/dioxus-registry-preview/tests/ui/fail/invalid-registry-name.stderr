@@ -1,0 +1,5 @@
+error: RDOC040: the Registry manifest name must be nonempty
+  --> tests/ui/fail/invalid-registry-name.rs:13:15
+   |
+13 |     manifest: "../../../../dioxus-registry-preview-core/tests/fixtures/catalog-errors/empty.json",
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,0 +1,5 @@
+error: RDOC026: unknown group ID `unknown` in the component! invocation at $DIR/tests/ui/fail/unknown-group/src/../components/widget/docs/mod.rs; valid group IDs: `fixtures`
+ --> tests/ui/fail/unknown-group/src/main.rs:6:15
+  |
+6 |     manifest: "../registry.json",
+  |               ^^^^^^^^^^^^^^^^^^

@@ -1,0 +1,5 @@
+error: raw identifiers are not supported for Example modules
+ --> tests/ui/fail/raw-example.rs:4:9
+  |
+4 |         r#type { description: "A raw Example module." },
+  |         ^^^^^^

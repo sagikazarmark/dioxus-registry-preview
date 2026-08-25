@@ -1,0 +1,5 @@
+{
+  "name": "custom_page",
+  "description": "A consumer-defined page assembly.",
+  "exclude": ["component.json", "README.md", "docs"]
+}

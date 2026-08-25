@@ -1,0 +1,5 @@
+error: RDOC022: duplicate example slug
+ --> tests/ui/fail/duplicate-slug.rs:9:19
+  |
+9 |             slug: "same",
+  |                   ^^^^^^

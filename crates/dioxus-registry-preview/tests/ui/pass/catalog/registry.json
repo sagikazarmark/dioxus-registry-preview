@@ -1,0 +1,5 @@
+{
+  "name": "catalog-fixture",
+  "description": "A generated catalog fixture.",
+  "members": ["components/widget"]
+}

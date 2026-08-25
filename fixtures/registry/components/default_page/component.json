@@ -1,0 +1,5 @@
+{
+  "name": "default_component",
+  "description": "The generated default assembly.",
+  "exclude": ["component.json", "README.md", "docs"]
+}

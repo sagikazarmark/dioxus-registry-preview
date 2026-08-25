@@ -1,0 +1,5 @@
+error: RDOC017: cannot read $DIR/tests/ui/fail/missing-example/docs/examples/absent.rs: No such file or directory (os error 2)
+ --> tests/ui/fail/missing-example/docs/mod.rs:4:9
+  |
+4 |         absent { description: "This file does not exist." },
+  |         ^^^^^^

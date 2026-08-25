@@ -1,0 +1,5 @@
+{
+  "name": "fixture-registry",
+  "description": "A valid documentation Registry fixture.",
+  "members": ["components/widget"]
+}

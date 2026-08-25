@@ -1,0 +1,5 @@
+error: RDOC038: Registry repository must be an absolute git, http, https, or ssh URL
+  --> tests/ui/fail/invalid-repository.rs:14:17
+   |
+14 |     repository: "../catalog-fixture",
+   |                 ^^^^^^^^^^^^^^^^^^^^

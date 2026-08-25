@@ -1,0 +1,5 @@
+error: RDOC039: Registry revision must be a nonempty Git revision without whitespace and may not start with `-`
+  --> tests/ui/fail/invalid-revision.rs:15:15
+   |
+15 |     revision: "release candidate",
+   |               ^^^^^^^^^^^^^^^^^^^

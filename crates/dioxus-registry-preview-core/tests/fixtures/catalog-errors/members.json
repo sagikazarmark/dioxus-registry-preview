@@ -1,0 +1,11 @@
+{
+  "members": [
+    "../escape",
+    "components\\windows",
+    "components/not-valid!",
+    "components/r#type",
+    "components/first/widget",
+    "components/second/widget",
+    "components/no_invocation"
+  ]
+}

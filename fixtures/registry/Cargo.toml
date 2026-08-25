@@ -1,0 +1,35 @@
+[package]
+name = "docs-registry-fixture"
+version = "0.1.0"
+description = "External-consumer fixture for dioxus-registry-preview"
+edition = "2024"
+rust-version = "1.88"
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[[bin]]
+name = "fixture-preview"
+path = "src/main.rs"
+required-features = ["web"]
+
+[[bin]]
+name = "custom-home-preview"
+path = "src/custom_home_main.rs"
+required-features = ["web"]
+
+[features]
+default = []
+web = ["dep:web-sys", "dioxus/launch", "dioxus/web"]
+
+[dependencies]
+fixture-docs = { package = "dioxus-registry-preview", path = "../../crates/dioxus-registry-preview", version = "0.3.0" }
+
+dioxus = { version = "0.7.0", default-features = false, features = ["lib"] }
+web-sys = { version = "0.3.77", features = ["Location", "Window"], optional = true }
+
+[lints]
+workspace = true
+
+[package.metadata.release]
+release = false
