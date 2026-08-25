@@ -96,7 +96,7 @@ preview = [
 ]
 
 [dependencies]
-dioxus-registry-preview = { git = "https://github.com/sagikazarmark/dioxus-registry-docs", rev = "<tooling-revision>", optional = true }
+dioxus-registry-preview = { version = "0.1.0", optional = true }
 
 dioxus = { version = "0.7.0", default-features = false, features = ["lib"] }
 web-sys = { version = "0.3.77", features = ["Location", "Window"], optional = true }
@@ -466,14 +466,9 @@ author-facing failure means.
 ## 8. Add generic browser coverage
 
 The Playwright helper and Rust facade consume the same versioned DOM protocol.
-Pin both to the same repository release or revision. Until `0.3.0` is published, the Cargo
-manifest in step 1 uses:
-
-```toml
-dioxus-registry-preview = { git = "https://github.com/sagikazarmark/dioxus-registry-docs", rev = "<tooling-revision>", optional = true }
-```
-
-and in `tests/browser/package.json`:
+Pin both to the same release. The Cargo manifest in step 1 uses
+`dioxus-registry-preview = { version = "0.1.0", optional = true }`, and
+`tests/browser/package.json` uses the matching helper release:
 
 ```json
 {
@@ -485,13 +480,21 @@ and in `tests/browser/package.json`:
   },
   "devDependencies": {
     "@playwright/test": "1.62.1",
-    "@sagikazarmark/dioxus-registry-preview-playwright": "github:sagikazarmark/dioxus-registry-docs#<tooling-revision>"
+    "@sagikazarmark/dioxus-registry-preview-playwright": "0.1.0"
   }
 }
 ```
 
-Do not independently float one side of the pair. When using a repository
-revision instead, pin both dependencies to that same revision.
+Do not independently float one side of the pair. To track unreleased changes,
+pin both dependencies to the same repository revision instead:
+
+```toml
+dioxus-registry-preview = { git = "https://github.com/sagikazarmark/dioxus-registry-docs", rev = "<tooling-revision>", optional = true }
+```
+
+```json
+"@sagikazarmark/dioxus-registry-preview-playwright": "github:sagikazarmark/dioxus-registry-docs#<tooling-revision>"
+```
 
 Create `tests/browser/playwright.config.ts`:
 
