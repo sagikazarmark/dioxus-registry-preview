@@ -2,7 +2,10 @@
 
 {
   dagger.enable = true;
-  env.DAGGER_X_RELEASE = "v1.0.0-beta.10";
+  env.DAGGER_X_RELEASE = "v1.0.0-beta.11";
+
+  # Required by arborium
+  env.CC_wasm32_unknown_unknown = "${pkgs.llvmPackages.clang-unwrapped}/bin/clang";
 
   packages = with pkgs; [
     lld
@@ -21,7 +24,6 @@
 
     javascript = {
       enable = true;
-
       npm.enable = true;
     };
   };
