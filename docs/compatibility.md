@@ -10,6 +10,10 @@ Before 1.0, changing the supported Dioxus minor line requires a minor release of
 
 The minimum supported Rust version is 1.88. The procedural macro uses `proc_macro::Span::local_file()` for invocation-relative discovery, which establishes that floor. CI runs the Rust suite on 1.88 and current stable.
 
+## Syntax Highlighting
+
+The facade's `syntax-highlighting` feature is off by default. Enabling it adds `dioxus-code` to the Preview and tree-sitter's C runtime to every build target, so a Preview that enables it needs a C compiler able to target `wasm32-unknown-unknown` (for example LLVM `clang` selected through `CC_wasm32_unknown_unknown`; Apple's bundled clang cannot). Example highlighting itself runs at compile time inside `component!`. The `0.x` facade tracks `dioxus-code` `0.1`; the highlighted-source types in the `code` module are re-exports, so a `dioxus-code` breaking release requires a facade minor release before 1.0. Turning the feature on by default would also be a minor release, because it introduces a new build requirement.
+
 ## Package Versions
 
 The three Rust packages are released together at the same version. Consumers depend only on `dioxus-registry-preview`; its macros package is an implementation dependency, while core discovery and validation are re-exported through the facade.

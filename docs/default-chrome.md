@@ -2,7 +2,7 @@
 
 The `dioxus-registry-preview` facade owns a complete default site and presentation for installation instructions, Examples, READMEs, source blocks, navigation, themes, and the site shell. Its stylesheets are compiled into the facade. `chrome::App` turns a page catalog into the complete site, `chrome::Shell` mounts the default stylesheet and light/dark switcher, `chrome::Sidebar` mounts its navigation stylesheet, and `chrome::Styles` can mount the default content styles under a Consumer-owned shell.
 
-Default chrome uses `rpv-*` classes beneath one `data-registry-preview-chrome` root. Its CSS contains no global reset, root selector, Tailwind utilities, or component-library theme variables, so a Consumer's stylesheet continues to own the surrounding page and rendered Components. Bare element selectors appear only below `.rpv-readme`, whose descendants are the facade's own build-time Markdown rendering; Example content and every other Consumer-rendered element stay untouched.
+Default chrome uses `rpv-*` classes beneath one `data-registry-preview-chrome` root. Its CSS contains no global reset, root selector, Tailwind utilities, or component-library theme variables, so a Consumer's stylesheet continues to own the surrounding page and rendered Components. Bare element selectors appear only below `.rpv-readme`, whose descendants are the facade's own build-time Markdown rendering; Example content and every other Consumer-rendered element stay untouched. With the `syntax-highlighting` feature, highlighted code additionally mounts `dioxus-code`'s class-scoped `.dxc*` and `.a-*` stylesheets, which likewise select no bare element or root.
 
 The zero-configuration `App` is the whole site, so it also owns the document surface: `App` mounts an additional document-level stylesheet that sets only the `html` and `body` background, margin, and scrollbar colors, making the selected theme cover the full page. `Shell` and `Styles` never mount that stylesheet — a Consumer with its own shell keeps full ownership of the document.
 
@@ -12,7 +12,7 @@ The facade exports:
 - `chrome::AppCatalog`, the generated descriptor, group-ID, and Registry-facts input to `App`, and `chrome::AppPage`, the Consumer-owned seam for rendering-kind names and literal page rendering;
 - `chrome::RegistryDocumentation`, `chrome::RegistrySource`, and `chrome::InstallationPage`, the reusable installation model and default presentation;
 - `chrome::ExampleSection` and `chrome::ReadmeSection`, including protocol markers;
-- `chrome::CodeBlock`, used by the default Example adapter;
+- `chrome::CodeBlock` and `chrome::CodeContent`, code presentation without a rendered preview, used by the Code tab and the installation page;
 - `chrome::PageCatalogManifest` and `chrome::ThemeSwitcherManifest`, the protocol writers a Consumer-owned shell mounts directly;
 - `chrome::ThemeSwitcher`, the visible default light/dark control and its theme manifest;
 - `chrome::Sidebar`, catalog-driven visible navigation with a Consumer-provided link builder;
@@ -20,6 +20,14 @@ The facade exports:
 - `chrome::Styles`, for Consumers that retain their own shell.
 
 Consumers mount protocol writers; they do not copy protocol-shaped markup into their shells. The conventional `crate::example` module may re-export the facade's Example and README adapters or define Consumer-owned replacements. No command copies or updates source files. Browser acceptance proves the packaged CSS applies without a Consumer stylesheet.
+
+## Examples and code
+
+`ExampleSection` shows the Example title and description beside a Preview / Code tab pair. Preview contains the rendered Example and the `data-example-content` marker and is selected initially; Code contains the exact Rust file the Example compiled from. Both panels stay in the DOM and the inactive one is hidden, so switching tabs never remounts the Example. The tabs follow the WAI-ARIA tabs pattern: roving focus, arrow keys, Home, and End.
+
+`CodeBlock` shows code without a preview. It accepts `CodeContent`, into which `&'static str`, `String`, and `Cow<'static, str>` convert as plain text, and an optional `label` that captions the panel with a file name or language. The installation page uses it for shell commands and `Dioxus.toml`; a Consumer page can show a manifest with `CodeBlock { content: include_str!("component.json"), label: "component.json" }`.
+
+With the facade's `syntax-highlighting` feature, `component!` highlights every Example source at compile time with tree-sitter's Rust grammar and the Code tab renders it through `dioxus_code::Code` with a fixed dark token theme; the chrome supplies the panel surface and typography so plain and highlighted blocks match in both chrome themes. `ExampleDocumentation::code()` returns that highlighted source, and `CodeBlock` accepts any `dioxus_code::advanced::HighlightedSource`, including a Consumer's own `dioxus_code::code!` or `code_str!` output. Those macros locate `dioxus-code` in the Consumer's own `Cargo.toml`, so a Consumer using them depends on `dioxus-code` directly; non-Rust languages there are feature-gated and pull in `dioxus-code`'s runtime parser. The feature needs a C compiler that targets `wasm32-unknown-unknown`; see [compatibility](compatibility.md). Without it, the Code tab and `CodeBlock` render plain preformatted text and the build compiles no C.
 
 ## Default site
 

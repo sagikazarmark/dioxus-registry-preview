@@ -23,10 +23,31 @@
 //!
 //! See the repository's Registry author guide for the companion manifests, README, and Example
 //! files required by the macros.
+//!
+//! # Syntax highlighting
+//!
+//! With the `syntax-highlighting` feature, `component!` highlights every Example source at
+//! compile time and the default chrome renders it through `dioxus-code`. The `code` module
+//! re-exports the types that carry highlighted source. Without the feature, Example sources render
+//! as plain preformatted text and no C toolchain is required for the `wasm32-unknown-unknown`
+//! target.
 
 pub mod chrome;
 
 pub use dioxus_registry_preview_macros::{component, component_pages};
+
+/// Compile-time highlighted source shared with `dioxus-code`.
+///
+/// `component!` produces [`HighlightSpan`](code::HighlightSpan) slices for every Example, and
+/// [`ExampleDocumentation::code`] assembles them into a
+/// [`HighlightedSource`](code::HighlightedSource) that
+/// [`chrome::CodeBlock`] renders. Consumers may pass their own highlighted snippets, for example
+/// from `dioxus_code::code!`, to the same chrome component.
+#[cfg(feature = "syntax-highlighting")]
+pub mod code {
+    pub use dioxus_code::Language;
+    pub use dioxus_code::advanced::{HighlightSpan, HighlightedSource};
+}
 
 /// Full-site discovery and validation for Consumer tests and other Rust tooling.
 pub mod validation {
@@ -213,6 +234,11 @@ pub struct ExampleDocumentation {
     pub description: &'static str,
     /// The exact source file that is compiled and rendered.
     pub source: &'static str,
+    /// Syntax-highlight spans over `source`, computed when the module was compiled.
+    ///
+    /// Present only with the `syntax-highlighting` feature.
+    #[cfg(feature = "syntax-highlighting")]
+    pub highlights: &'static [code::HighlightSpan],
 }
 
 impl ExampleDocumentation {
@@ -223,12 +249,29 @@ impl ExampleDocumentation {
         title: &'static str,
         description: &'static str,
         source: &'static str,
+        #[cfg(feature = "syntax-highlighting")] highlights: &'static [code::HighlightSpan],
     ) -> Self {
         Self {
             slug,
             title,
             description,
             source,
+            #[cfg(feature = "syntax-highlighting")]
+            highlights,
         }
+    }
+
+    /// The Example source paired with its compile-time highlight spans.
+    ///
+    /// The result borrows the same `source` text that the Example renders from, so the highlighted
+    /// and compiled Example cannot drift apart.
+    #[cfg(feature = "syntax-highlighting")]
+    #[must_use]
+    pub const fn code(&self) -> code::HighlightedSource {
+        code::HighlightedSource::from_static_parts(
+            self.source,
+            code::Language::Rust,
+            self.highlights,
+        )
     }
 }

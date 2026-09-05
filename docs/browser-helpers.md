@@ -4,7 +4,7 @@
 
 - `openPreview(page, address, motion)` opens a catalog path, writes the theme as the `theme` query parameter, waits for the catalog and current-page markers, verifies the matching theme control is checked, and optionally quiesces motion.
 - `addresses(page)` returns every browser-enabled catalog page under every baseline theme, including pages omitted from navigation.
-- `example(page, slug)` returns the marked rendered content of one Example.
+- `example(page, slug)` returns the marked rendered content of one Example. The default chrome selects its Preview tab initially, so that content is visible without interacting with the chrome; a spec that opens the Code tab hides it.
 - `themes(page)` returns stable theme IDs in switcher order.
 - `computedStyle(locator, property, pseudo?)` reads one computed property from every matched element.
 

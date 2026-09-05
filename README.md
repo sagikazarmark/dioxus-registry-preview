@@ -68,7 +68,7 @@ let validation = load_site_from_catalog(
 assert!(validation.diagnostics.is_empty());
 ```
 
-The facade's default site, Example, README, source, navigation, and shell chrome uses small namespaced stylesheets scoped to `data-registry-preview-chrome`. It requires no Tailwind installation and can be replaced through the existing adapter paths or by mounting a Consumer-owned shell.
+The facade's default site, Example, README, source, navigation, and shell chrome uses small namespaced stylesheets scoped to `data-registry-preview-chrome`. It requires no Tailwind installation and can be replaced through the existing adapter paths or by mounting a Consumer-owned shell. Each Example renders behind Preview and Code tabs; the opt-in `syntax-highlighting` feature highlights the Code tab at compile time and renders it through [`dioxus-code`](https://crates.io/crates/dioxus-code), at the cost of needing a C compiler that targets `wasm32-unknown-unknown`.
 
 The Playwright helpers are available as an npm package:
 
@@ -88,9 +88,10 @@ See [compatibility](docs/compatibility.md), [browser helpers](docs/browser-helpe
 cargo fmt --all --check
 cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo test --workspace --all-targets --locked
+cargo test --package dioxus-registry-preview --all-targets --locked
 ```
 
-The browser acceptance test additionally requires the Dioxus CLI, `wasm32-unknown-unknown`, npm, and Playwright's Chromium:
+The workspace run exercises the facade with `syntax-highlighting` because the fixture enables it; the facade-only run covers the default, feature-off path. The browser acceptance test additionally requires the Dioxus CLI, `wasm32-unknown-unknown`, a C compiler that targets it (see `devenv.nix`), npm, and Playwright's Chromium:
 
 ```shell
 npm ci

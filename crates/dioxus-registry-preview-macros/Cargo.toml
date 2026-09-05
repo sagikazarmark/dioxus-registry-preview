@@ -12,9 +12,17 @@ categories.workspace = true
 [lib]
 proc-macro = true
 
+[features]
+default = []
+# Highlights Example sources with tree-sitter at expansion time. Enabled through the facade's
+# `syntax-highlighting` feature; never enable it directly.
+syntax-highlighting = ["dep:arborium", "dep:arborium-theme"]
+
 [dependencies]
 dioxus-registry-preview-core = { workspace = true }
 
+arborium = { version = "2.16.0", default-features = false, features = ["lang-rust"], optional = true }
+arborium-theme = { version = "2.16.0", optional = true }
 proc-macro-crate = "3.0.0"
 proc-macro2 = "1.0.101"
 quote = "1.0.36"

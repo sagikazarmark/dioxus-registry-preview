@@ -16,6 +16,9 @@ use proc_macro2::Span;
 use quote::quote;
 use syn::{Ident, LitStr, Result, parse_macro_input};
 
+#[cfg(feature = "syntax-highlighting")]
+mod highlight;
+
 /// Generates one component's documentation metadata and Preview page.
 ///
 /// The macro is invoked from `<component>/docs/mod.rs`. By default it reads
@@ -156,6 +159,7 @@ fn expand_component(input: ComponentInvocation) -> Result<proc_macro2::TokenStre
         let example_description = LitStr::new(&model.description, example.description.span());
         let index = syn::Index::from(index);
         let section = Ident::new(&example_section_name(&module.to_string()), module.span());
+        let highlights = example_highlights(&docs_crate, &module, &model.source)?;
 
         module_declarations.push(quote! {
             #[path = #example_path]
@@ -167,6 +171,7 @@ fn expand_component(input: ComponentInvocation) -> Result<proc_macro2::TokenStre
                 #title,
                 #example_description,
                 include_str!(#example_path),
+                #highlights
             )
         });
         generated_example_sections.push(quote! {
@@ -604,6 +609,34 @@ fn include_path(component_root: &str, file: &str) -> String {
         .join(file)
         .to_string_lossy()
         .into_owned()
+}
+
+/// The highlight-span argument appended to `ExampleDocumentation::new`.
+///
+/// Without the `syntax-highlighting` feature the facade constructor has no such parameter and
+/// the expansion stays free of tree-sitter.
+#[cfg(feature = "syntax-highlighting")]
+fn example_highlights(
+    docs_crate: &proc_macro2::TokenStream,
+    module: &Ident,
+    source: &str,
+) -> Result<proc_macro2::TokenStream> {
+    highlight::rust_spans(docs_crate, source).map_err(|error| {
+        syn::Error::new(
+            module.span(),
+            format!("cannot highlight the Example source for `{module}`: {error}"),
+        )
+    })
+}
+
+#[cfg(not(feature = "syntax-highlighting"))]
+#[allow(clippy::unnecessary_wraps)]
+fn example_highlights(
+    _docs_crate: &proc_macro2::TokenStream,
+    _module: &Ident,
+    _source: &str,
+) -> Result<proc_macro2::TokenStream> {
+    Ok(proc_macro2::TokenStream::new())
 }
 
 fn catalog_path(prefix: &str, id: &str) -> String {
