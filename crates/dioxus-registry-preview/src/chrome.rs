@@ -540,18 +540,18 @@ pub fn InstallationPage(registry: RegistryDocumentation) -> Element {
                 p { class: "rpv-installation__copy",
                     "Install the default component directly from the Registry's Git source."
                 }
-                CodeBlock { source: component_command }
+                CodeBlock { content: component_command, label: "shell" }
             }
             section { class: "rpv-installation__section",
                 h2 { class: "rpv-installation__section-title", "Add every component" }
-                CodeBlock { source: all_command }
+                CodeBlock { content: all_command, label: "shell" }
             }
             section { class: "rpv-installation__section",
                 h2 { class: "rpv-installation__section-title", "Configure Dioxus" }
                 p { class: "rpv-installation__copy",
                     "Add the Registry to Dioxus.toml so later commands only need a component name."
                 }
-                CodeBlock { source: configuration }
+                CodeBlock { content: configuration, label: "Dioxus.toml" }
             }
             section { class: "rpv-installation__section",
                 h2 { class: "rpv-installation__section-title", "Available components" }
@@ -724,16 +724,145 @@ fn app_href(path: &str, query: &str) -> String {
 }
 
 /// The default chrome around one rendered Example and its source.
+///
+/// The section shows the Example title and description above a Preview / Code tab pair. Both
+/// panels stay attached to the DOM so switching tabs never remounts the Example; the inactive
+/// panel is hidden. The Code tab renders the exact compiled source, highlighted when the
+/// `syntax-highlighting` feature is enabled.
 #[component]
 pub fn ExampleSection(documentation: ExampleDocumentation, children: Element) -> Element {
+    let mut view = use_signal(|| ExampleView::Preview);
+    let mut tabs: Signal<[Option<Rc<MountedData>>; 2]> = use_signal(|| [None, None]);
+    let slug = documentation.slug;
+    let select = move |next: ExampleView| {
+        let mut view = view;
+        view.set(next);
+        if let Some(tab) = tabs.read()[next.index()].clone() {
+            spawn(async move {
+                let _ = tab.set_focus(true).await;
+            });
+        }
+    };
+
     rsx! {
-        section { "data-example": documentation.slug, class: "rpv-example",
-            h2 { class: "rpv-example__title", "{documentation.title}" }
-            p { class: "rpv-example__description", "{documentation.description}" }
-            div { "data-example-content": "true", class: "rpv-example__content", {children} }
-            CodeBlock { source: documentation.source }
+        section { "data-example": slug, class: "rpv-example",
+            header { class: "rpv-example__header",
+                div { class: "rpv-example__heading",
+                    h2 { class: "rpv-example__title", "{documentation.title}" }
+                    p { class: "rpv-example__description", "{documentation.description}" }
+                }
+                div {
+                    role: "tablist",
+                    class: "rpv-example__tabs",
+                    aria_label: "{documentation.title} views",
+                    for tab in ExampleView::ALL {
+                        button {
+                            key: "{tab.id()}",
+                            r#type: "button",
+                            role: "tab",
+                            id: example_tab_id(slug, tab),
+                            class: "rpv-example__tab",
+                            aria_selected: if view() == tab { "true" } else { "false" },
+                            aria_controls: example_panel_id(slug, tab),
+                            tabindex: if view() == tab { "0" } else { "-1" },
+                            onmounted: move |event| tabs.write()[tab.index()] = Some(event.data()),
+                            onclick: move |_| view.set(tab),
+                            onkeydown: move |event| {
+                                let next = match event.key() {
+                                    Key::ArrowRight | Key::ArrowDown => tab.next(),
+                                    Key::ArrowLeft | Key::ArrowUp => tab.previous(),
+                                    Key::Home => ExampleView::Preview,
+                                    Key::End => ExampleView::Code,
+                                    _ => return,
+                                };
+                                event.prevent_default();
+                                select(next);
+                            },
+                            "{tab.label()}"
+                        }
+                    }
+                }
+            }
+            div {
+                id: example_panel_id(slug, ExampleView::Preview),
+                role: "tabpanel",
+                aria_labelledby: example_tab_id(slug, ExampleView::Preview),
+                hidden: view() != ExampleView::Preview,
+                "data-example-content": "true",
+                class: "rpv-example__content",
+                {children}
+            }
+            div {
+                id: example_panel_id(slug, ExampleView::Code),
+                role: "tabpanel",
+                aria_labelledby: example_tab_id(slug, ExampleView::Code),
+                hidden: view() != ExampleView::Code,
+                class: "rpv-example__code",
+                CodeBlock { content: example_code(&documentation) }
+            }
         }
     }
+}
+
+/// The panel an Example section shows.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum ExampleView {
+    Preview,
+    Code,
+}
+
+impl ExampleView {
+    const ALL: [Self; 2] = [Self::Preview, Self::Code];
+
+    const fn id(self) -> &'static str {
+        match self {
+            Self::Preview => "preview",
+            Self::Code => "code",
+        }
+    }
+
+    const fn label(self) -> &'static str {
+        match self {
+            Self::Preview => "Preview",
+            Self::Code => "Code",
+        }
+    }
+
+    const fn index(self) -> usize {
+        match self {
+            Self::Preview => 0,
+            Self::Code => 1,
+        }
+    }
+
+    const fn next(self) -> Self {
+        match self {
+            Self::Preview => Self::Code,
+            Self::Code => Self::Preview,
+        }
+    }
+
+    const fn previous(self) -> Self {
+        self.next()
+    }
+}
+
+fn example_tab_id(slug: &str, view: ExampleView) -> String {
+    format!("rpv-example-{slug}-{}-tab", view.id())
+}
+
+fn example_panel_id(slug: &str, view: ExampleView) -> String {
+    format!("rpv-example-{slug}-{}-panel", view.id())
+}
+
+#[cfg(feature = "syntax-highlighting")]
+fn example_code(documentation: &ExampleDocumentation) -> CodeContent {
+    CodeContent::Highlighted(documentation.code())
+}
+
+#[cfg(not(feature = "syntax-highlighting"))]
+fn example_code(documentation: &ExampleDocumentation) -> CodeContent {
+    CodeContent::Plain(Cow::Borrowed(documentation.source))
 }
 
 /// The default chrome around trusted, build-time README HTML.
@@ -751,18 +880,77 @@ pub fn ReadmeSection(html: &'static str) -> Element {
     }
 }
 
-/// Code presentation used by default chrome components.
+/// Source text presented by [`CodeBlock`].
+#[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
+pub enum CodeContent {
+    /// Preformatted text rendered without highlighting.
+    Plain(Cow<'static, str>),
+    /// Compile-time highlighted source rendered through `dioxus-code`.
+    #[cfg(feature = "syntax-highlighting")]
+    Highlighted(crate::code::HighlightedSource),
+}
+
+impl From<&'static str> for CodeContent {
+    fn from(source: &'static str) -> Self {
+        Self::Plain(Cow::Borrowed(source))
+    }
+}
+
+impl From<String> for CodeContent {
+    fn from(source: String) -> Self {
+        Self::Plain(Cow::Owned(source))
+    }
+}
+
+impl From<Cow<'static, str>> for CodeContent {
+    fn from(source: Cow<'static, str>) -> Self {
+        Self::Plain(source)
+    }
+}
+
+#[cfg(feature = "syntax-highlighting")]
+impl From<crate::code::HighlightedSource> for CodeContent {
+    fn from(source: crate::code::HighlightedSource) -> Self {
+        Self::Highlighted(source)
+    }
+}
+
+/// A standalone code panel without a rendered preview.
+///
+/// Pass plain text for content assembled at runtime, or a highlighted source such as
+/// [`ExampleDocumentation::code`] or the output of `dioxus_code::code!` when the
+/// `syntax-highlighting` feature is enabled. An optional `label` captions the panel, for example
+/// with a file name or language.
 #[component]
-pub fn CodeBlock(#[props(into)] source: Cow<'static, str>) -> Element {
+pub fn CodeBlock(
+    #[props(into)] content: CodeContent,
+    #[props(into)] label: Option<String>,
+) -> Element {
     rsx! {
         figure { class: "rpv-code-panel",
-            figcaption { class: "rpv-code-panel__label", "Source" }
-            pre { class: "rpv-code",
-                code { "{source}" }
+            if let Some(label) = label {
+                figcaption { class: "rpv-code-panel__label", "{label}" }
+            }
+            match content {
+                CodeContent::Plain(source) => rsx! {
+                    pre { class: "rpv-code",
+                        code { "{source}" }
+                    }
+                },
+                #[cfg(feature = "syntax-highlighting")]
+                CodeContent::Highlighted(source) => rsx! {
+                    dioxus_code::Code { src: source, theme: CODE_THEME }
+                },
             }
         }
     }
 }
+
+/// The fixed token palette for highlighted code. The panel surface itself comes from the chrome
+/// stylesheet so highlighted and plain blocks share one look in both chrome themes.
+#[cfg(feature = "syntax-highlighting")]
+const CODE_THEME: dioxus_code::Theme = dioxus_code::Theme::GITHUB_DARK;
 
 /// Installs the isolated default chrome stylesheet into the document head.
 #[component]

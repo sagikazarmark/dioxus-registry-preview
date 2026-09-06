@@ -39,6 +39,12 @@ fn main() {
 Follow the [Registry author guide](https://github.com/sagikazarmark/dioxus-registry-docs/blob/main/docs/getting-started.md)
 to create the companion manifests, documentation modules, Examples, catalog, and browser tests.
 
+## Features
+
+- `syntax-highlighting`: highlights Example sources at compile time and renders them through
+  [`dioxus-code`](https://crates.io/crates/dioxus-code). Off by default because it requires a C
+  compiler that targets `wasm32-unknown-unknown`.
+
 ## License
 
 Licensed under either of

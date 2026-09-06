@@ -23,9 +23,11 @@ default = []
 web = ["dep:web-sys", "dioxus/launch", "dioxus/web"]
 
 [dependencies]
-fixture-docs = { package = "dioxus-registry-preview", path = "../../crates/dioxus-registry-preview", version = "0.1.0" }
+fixture-docs = { package = "dioxus-registry-preview", path = "../../crates/dioxus-registry-preview", version = "0.1.0", features = ["syntax-highlighting"] }
 
 dioxus = { version = "0.7.10", default-features = false, features = ["lib"] }
+# Consumer-side compile-time highlighting for handwritten snippets passed to `chrome::CodeBlock`.
+dioxus-code = "0.1.2"
 web-sys = { version = "0.3.77", features = ["Location", "Window"], optional = true }
 
 [lints]

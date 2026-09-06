@@ -9,11 +9,21 @@ repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
 
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = []
+# Syntax-highlights Example sources at compile time and renders them through `dioxus-code`.
+# Building a Preview with this feature requires a C compiler that targets `wasm32-unknown-unknown`.
+syntax-highlighting = ["dep:dioxus-code", "dioxus-registry-preview-macros/syntax-highlighting"]
+
 [dependencies]
 dioxus-registry-preview-core = { workspace = true }
 dioxus-registry-preview-macros = { workspace = true }
 
 dioxus = { version = "0.7.10", default-features = false, features = ["lib", "router"] }
+dioxus-code = { version = "0.1.2", default-features = false, optional = true }
 
 [dev-dependencies]
 dioxus-ssr = "0.7.10"

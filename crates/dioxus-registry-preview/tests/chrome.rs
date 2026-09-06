@@ -1,11 +1,11 @@
 use dioxus::prelude::*;
 use dioxus_registry_preview::chrome::{
-    App, AppCatalog, AppPage, AppProps, CatalogEntry, InstallationPage, PageCatalogManifest,
-    PageCatalogManifestProps, RegistryDocumentation, RegistrySource, Shell, Sidebar, ThemeEntry,
-    ThemeSwitcher, ThemeSwitcherManifest, ThemeSwitcherManifestProps,
+    App, AppCatalog, AppPage, AppProps, CatalogEntry, CodeBlock, ExampleSection, InstallationPage,
+    PageCatalogManifest, PageCatalogManifestProps, RegistryDocumentation, RegistrySource, Shell,
+    Sidebar, ThemeEntry, ThemeSwitcher, ThemeSwitcherManifest, ThemeSwitcherManifestProps,
 };
 use dioxus_registry_preview::{
-    BrowserTestPolicy, ListingPolicy, NavigationPlacement, PageDescriptor,
+    BrowserTestPolicy, ExampleDocumentation, ListingPolicy, NavigationPlacement, PageDescriptor,
 };
 
 #[derive(Clone, Copy, PartialEq)]
@@ -611,4 +611,133 @@ fn app_rejects_the_reserved_installation_id_when_synthesizing_the_page() {
         catalog: RESERVED_INSTALLATION_ID_CATALOG,
         title: "Registry documentation",
     });
+}
+
+const EXAMPLE_SOURCE: &str = "use dioxus::prelude::*;\n\n#[component]\npub fn Example() -> Element {\n    rsx! { button { \"Save\" } }\n}\n";
+
+#[cfg(feature = "syntax-highlighting")]
+const EXAMPLE: ExampleDocumentation = ExampleDocumentation::new(
+    "overview",
+    "Overview",
+    "Shows the default button.",
+    EXAMPLE_SOURCE,
+    &[
+        dioxus_registry_preview::code::HighlightSpan::new(0..3, "k"),
+        dioxus_registry_preview::code::HighlightSpan::new(38..41, "k"),
+        dioxus_registry_preview::code::HighlightSpan::new(42..44, "k"),
+    ],
+);
+
+#[cfg(not(feature = "syntax-highlighting"))]
+const EXAMPLE: ExampleDocumentation = ExampleDocumentation::new(
+    "overview",
+    "Overview",
+    "Shows the default button.",
+    EXAMPLE_SOURCE,
+);
+
+fn render_example_section() -> String {
+    dioxus_ssr::render_element(rsx! {
+        ExampleSection { documentation: EXAMPLE,
+            button { "Save" }
+        }
+    })
+}
+
+#[test]
+fn example_section_shows_the_preview_tab_and_keeps_the_code_panel_mounted() {
+    let html = render_example_section();
+
+    assert!(
+        html.starts_with("<section data-example=\"overview\" class=\"rpv-example\">"),
+        "{html}"
+    );
+    assert!(html.contains("<h2 class=\"rpv-example__title\">Overview</h2>"));
+    assert!(html.contains("<p class=\"rpv-example__description\">Shows the default button.</p>"));
+    assert!(html.contains(
+        "<button type=\"button\" role=\"tab\" id=\"rpv-example-overview-preview-tab\" class=\"rpv-example__tab\" aria-selected=\"true\" aria-controls=\"rpv-example-overview-preview-panel\" tabindex=\"0\">Preview</button>"
+    ), "{html}");
+    assert!(html.contains(
+        "<button type=\"button\" role=\"tab\" id=\"rpv-example-overview-code-tab\" class=\"rpv-example__tab\" aria-selected=\"false\" aria-controls=\"rpv-example-overview-code-panel\" tabindex=\"-1\">Code</button>"
+    ), "{html}");
+    assert!(html.contains(
+        "<div id=\"rpv-example-overview-preview-panel\" role=\"tabpanel\" aria-labelledby=\"rpv-example-overview-preview-tab\" data-example-content=\"true\" class=\"rpv-example__content\"><button>Save</button></div>"
+    ), "{html}");
+    assert!(html.contains(
+        "<div id=\"rpv-example-overview-code-panel\" role=\"tabpanel\" aria-labelledby=\"rpv-example-overview-code-tab\" hidden=true class=\"rpv-example__code\"><figure class=\"rpv-code-panel\">"
+    ), "{html}");
+    assert!(
+        !html.contains("rpv-code-panel__label"),
+        "the Code tab needs no caption: {html}"
+    );
+    assert!(html.contains(" Example() -&#62; Element {"), "{html}");
+}
+
+#[cfg(feature = "syntax-highlighting")]
+#[test]
+fn example_section_highlights_the_source_through_dioxus_code() {
+    let html = render_example_section();
+
+    assert!(
+        html.contains("<pre class=\"dxc dxc-github-dark\" data-language=\"rust\"><code>"),
+        "{html}"
+    );
+    assert!(html.contains("<span class=\"a-k\">use</span>"), "{html}");
+    assert!(html.contains("<span class=\"a-k\">fn</span>"), "{html}");
+    assert!(!html.contains("class=\"rpv-code\""), "{html}");
+}
+
+#[cfg(not(feature = "syntax-highlighting"))]
+#[test]
+fn example_section_falls_back_to_plain_source_without_highlighting() {
+    let html = render_example_section();
+
+    assert!(
+        html.contains("<pre class=\"rpv-code\"><code>use dioxus::prelude::*;"),
+        "{html}"
+    );
+    assert!(!html.contains("class=\"dxc"), "{html}");
+}
+
+#[test]
+fn code_block_renders_plain_text_with_an_optional_label() {
+    let labelled = dioxus_ssr::render_element(rsx! {
+        CodeBlock { content: "dx components add button", label: "shell" }
+    });
+    let unlabelled = dioxus_ssr::render_element(rsx! {
+        CodeBlock { content: String::from("[components]") }
+    });
+
+    assert_eq!(
+        labelled,
+        "<figure class=\"rpv-code-panel\"><figcaption class=\"rpv-code-panel__label\">shell</figcaption><pre class=\"rpv-code\"><code>dx components add button</code></pre></figure>"
+    );
+    assert_eq!(
+        unlabelled,
+        "<figure class=\"rpv-code-panel\"><pre class=\"rpv-code\"><code>[components]</code></pre></figure>"
+    );
+}
+
+#[cfg(feature = "syntax-highlighting")]
+#[test]
+fn code_block_renders_consumer_supplied_highlighted_source() {
+    use dioxus_registry_preview::code::{HighlightSpan, HighlightedSource, Language};
+
+    const SPANS: &[HighlightSpan] = &[HighlightSpan::new(0..3, "k")];
+    let html = dioxus_ssr::render_element(rsx! {
+        CodeBlock {
+            content: HighlightedSource::from_static_parts("let x = 1;", Language::Rust, SPANS),
+            label: "snippet.rs",
+        }
+    });
+
+    assert!(
+        html.contains("<figcaption class=\"rpv-code-panel__label\">snippet.rs</figcaption>"),
+        "{html}"
+    );
+    assert!(
+        html.contains("<pre class=\"dxc dxc-github-dark\" data-language=\"rust\"><code>"),
+        "{html}"
+    );
+    assert!(html.contains("<span class=\"a-k\">let</span>"), "{html}");
 }

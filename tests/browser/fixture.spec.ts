@@ -306,3 +306,64 @@ test("default page renders every generated section", async ({ page }) => {
   await expect(defaultPage.locator("[data-readme]")).toBeVisible();
   await expect(defaultPage.locator('[data-example="overview"]')).toBeVisible();
 });
+
+test("Example sections switch between the Preview and Code tabs", async ({ page }) => {
+  await openPreview(page, {
+    page: { id: "default_component", path: "/default_component" },
+    theme: "light",
+  });
+
+  const section = page.locator('[data-example="overview"]');
+  const previewTab = section.getByRole("tab", { name: "Preview" });
+  const codeTab = section.getByRole("tab", { name: "Code" });
+  const codePanel = section.getByRole("tabpanel", { name: "Code", includeHidden: true });
+  const highlighted = codePanel.locator("pre.dxc[data-language='rust']");
+
+  await expect(previewTab).toHaveAttribute("aria-selected", "true");
+  await expect(example(page, "overview")).toBeVisible();
+  await expect(codePanel).toBeHidden();
+  await expect(highlighted).toBeAttached();
+
+  await codeTab.click();
+
+  await expect(codeTab).toHaveAttribute("aria-selected", "true");
+  await expect(codeTab).toBeFocused();
+  await expect(example(page, "overview")).toBeHidden();
+  await expect(codePanel).toBeVisible();
+  await expect(highlighted).toContainText('rsx! { button { "Default Example" } }');
+  // dioxus-code's theme stylesheet reached the bundle through the facade dependency, and the
+  // chrome surface overrides the theme background so plain and highlighted blocks match.
+  const keyword = highlighted.locator("span.a-k").first();
+  await expect(keyword).toHaveText("use");
+  expect(await computedStyle(keyword, "color")).toEqual(["rgb(255, 123, 114)"]);
+  expect(await computedStyle(highlighted, "background-color")).toEqual(["rgb(34, 37, 43)"]);
+
+  await codeTab.press("ArrowLeft");
+
+  await expect(previewTab).toHaveAttribute("aria-selected", "true");
+  await expect(previewTab).toBeFocused();
+  await expect(example(page, "overview")).toBeVisible();
+  await expect(codePanel).toBeHidden();
+});
+
+test("consumer pages show code without a preview", async ({ page }) => {
+  await openPreview(page, {
+    page: { id: "custom_page", path: "/custom_page" },
+    theme: "dark",
+  });
+
+  const customPage = page.locator('[data-page="custom_page"]');
+  const panels = customPage.locator(".rpv-code-panel:has(.rpv-code-panel__label)");
+
+  await expect(panels.locator(".rpv-code-panel__label")).toHaveText([
+    "component.json",
+    "Importing an Example",
+  ]);
+  await expect(panels.nth(0).locator("pre.rpv-code")).toContainText('"name": "custom_page"');
+  await expect(panels.nth(1).locator("pre.dxc[data-language='rust'] span.a-k").first()).toHaveText(
+    "use",
+  );
+  expect(await computedStyle(panels.nth(1).locator("pre.dxc"), "background-color")).toEqual([
+    "rgb(13, 15, 18)",
+  ]);
+});

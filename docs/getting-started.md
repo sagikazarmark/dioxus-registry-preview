@@ -218,7 +218,22 @@ pub fn Example() -> Element {
 Every declared Example is a Rust module under `docs/examples`. It must expose a
 public, zero-prop Dioxus component named `Example`. The macro compiles that
 component and stores the exact same file as displayed source, so rendered and
-printed Examples cannot drift apart.
+printed Examples cannot drift apart. The default chrome shows each Example
+behind a Preview / Code tab pair; the Code tab is that file.
+
+To syntax-highlight the Code tab, enable the facade's `syntax-highlighting`
+feature:
+
+```toml
+dioxus-registry-preview = { version = "0.1.0", optional = true, features = ["syntax-highlighting"] }
+```
+
+The macro then highlights every Example at compile time and the chrome renders
+it through `dioxus-code`. The feature adds tree-sitter's C runtime to the
+Preview build, so the machine building it needs a C compiler that targets
+`wasm32-unknown-unknown`; on macOS that is LLVM `clang` from Homebrew or Nix,
+selected with `CC_wasm32_unknown_unknown`, because Apple's bundled clang cannot.
+Without the feature nothing compiles C and the Code tab shows plain text.
 
 Create `src/components/button/docs/mod.rs`:
 
@@ -657,6 +672,43 @@ If generic browser helpers remain part of the site, continue mounting the
 facade's protocol writers and preserve the semantic promises of `data-page`,
 catalog, Example, and theme markers. Classes, labels, and visual structure are
 not part of that protocol.
+
+### Code without a preview
+
+`chrome::CodeBlock` shows code that has no rendered Example, such as a manifest
+or a configuration snippet. Plain text works in every build:
+
+```rust
+use dioxus_registry_preview::chrome::CodeBlock;
+
+rsx! {
+    CodeBlock { content: include_str!("../component.json"), label: "component.json" }
+}
+```
+
+With `syntax-highlighting` enabled, `CodeBlock` also accepts a highlighted
+source. Add `dioxus-code` to the Preview's own dependencies and produce one at
+compile time; the macro looks the crate up in your `Cargo.toml`, so the facade's
+re-export is not enough:
+
+```rust
+use dioxus_code::{CodeOptions, Language, code_str};
+use dioxus_registry_preview::chrome::CodeBlock;
+
+rsx! {
+    CodeBlock {
+        content: code_str!(
+            "use crate::examples::button::overview::Example;",
+            CodeOptions::builder().with_language(Language::Rust)
+        ),
+        label: "Importing an Example",
+    }
+}
+```
+
+`dioxus-code` gates every non-Rust language behind a `lang-*` feature that also
+enables its runtime parser, so highlighted JSON or TOML costs more than plain
+text. Keep manifests plain unless the highlighting is worth that weight.
 
 ## Convention and diagnostic reference
 

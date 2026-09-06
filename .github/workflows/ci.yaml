@@ -35,6 +35,9 @@ jobs:
       - name: Test workspace
         run: cargo test --workspace --all-targets --locked
 
+      - name: Test the facade without syntax highlighting
+        run: cargo test --package dioxus-registry-preview --all-targets --locked
+
       - name: Test documentation
         run: cargo test --workspace --doc --locked
 
