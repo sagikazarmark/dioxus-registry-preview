@@ -947,7 +947,7 @@ dependencies = [
 
 [[package]]
 name = "dioxus-registry-preview"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "dioxus",
  "dioxus-code",
@@ -959,7 +959,7 @@ dependencies = [
 
 [[package]]
 name = "dioxus-registry-preview-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "proc-macro2",
  "pulldown-cmark",
@@ -971,7 +971,7 @@ dependencies = [
 
 [[package]]
 name = "dioxus-registry-preview-macros"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "arborium",
  "arborium-theme",

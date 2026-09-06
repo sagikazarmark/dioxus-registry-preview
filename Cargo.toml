@@ -6,7 +6,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.88"
 license = "MIT OR Apache-2.0"
@@ -15,8 +15,8 @@ keywords = ["dioxus", "components", "documentation", "registry"]
 categories = ["development-tools", "web-programming"]
 
 [workspace.dependencies]
-dioxus-registry-preview-core = { path = "crates/dioxus-registry-preview-core", version = "0.1.0" }
-dioxus-registry-preview-macros = { path = "crates/dioxus-registry-preview-macros", version = "0.1.0" }
+dioxus-registry-preview-core = { path = "crates/dioxus-registry-preview-core", version = "0.2.0" }
+dioxus-registry-preview-macros = { path = "crates/dioxus-registry-preview-macros", version = "0.2.0" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
