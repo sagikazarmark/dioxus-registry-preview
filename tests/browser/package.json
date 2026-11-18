@@ -8,6 +8,6 @@
   },
   "devDependencies": {
     "@sagikazarmark/dioxus-registry-preview-playwright": "file:../..",
-    "@playwright/test": "1.62.1"
+    "@playwright/test": "1.65.1"
   }
 }
